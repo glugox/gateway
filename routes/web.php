@@ -15,6 +15,27 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+$router->group(['prefix' => 'api'], function () use ($router) {
 
-//$router->post('auth/login', [ 'uses' => 'AuthController@login']);
-$router->post('auth/login', [ 'uses' => 'AuthController@login']);
+    /** Authorisation */
+    $router->post('login', [ 'uses' => 'AuthController@login']);
+
+    $router->group(['middleware' => ['auth:api']], function () use ($router) {
+
+            /**
+             * Before getting into services, let the Gateway handle its own duties,
+             * like settings.
+             */
+            $router->get('settings', 'SettingsController@index');
+
+            /**
+             * All request methods go to ForwardController@forward. The controller htan
+             * knows what to do based on that and url path varisbles.
+             */
+            foreach (['get', 'delete', 'head', 'patch', 'post', 'put'] as $method) {
+                $router->$method('{service}[/{resource}[/{action}]]', 'ForwardController@forward');
+            }
+
+    });
+    
+});

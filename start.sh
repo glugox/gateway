@@ -1,1 +1,1 @@
-php -S localhost:5020 -t public
+php -S localhost:5000 -t public
